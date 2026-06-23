@@ -11,18 +11,35 @@ This is an npm workspaces monorepo — `backend` and `frontend` are separate wor
 
 ## Setup
 
+### 1. Database
+
+Requires PostgreSQL. Create a dedicated user and database (run as the `postgres` superuser):
+
+```bash
+sudo -u postgres psql -c "CREATE USER warehouse WITH PASSWORD 'choose-a-strong-password';"
+sudo -u postgres psql -c "CREATE DATABASE warehouse OWNER warehouse;"
+```
+
+Pick your own password here — this becomes part of `DATABASE_URL` below. If `psql` reports an auth error when the app later connects, your `pg_hba.conf` may need local connections set to `md5` instead of `peer`/`trust`.
+
+A `setup-database.sh` script exists at the repo root that automates the above, but it unconditionally **drops** any existing `warehouse` user/database first and hardcodes a weak password — only use it for a disposable dev instance, never against a database you care about.
+
+### 2. App
+
 ```bash
 npm run install:all          # installs root + backend + frontend deps
 
 cp backend/.env.example backend/.env
-# edit backend/.env: set DATABASE_URL, JWT_SECRET, JWT_REFRESH_SECRET, ENCRYPTION_KEY
+# edit backend/.env:
+#   DATABASE_URL="postgresql://warehouse:<your-password>@localhost:5432/warehouse?schema=public"
+#   JWT_SECRET, JWT_REFRESH_SECRET, ENCRYPTION_KEY
 # generate secrets with: openssl rand -base64 64 / openssl rand -hex 32
 
-npm run db:push              # create database schema
-npm run dev                  # backend on :3000, frontend on :5317
+npm run db:push               # sync Prisma schema into the database (creates tables)
+npm run dev                   # backend on :3000, frontend on :5317
 
-npm run bootstrap            # first-time only: creates default roles + admin user
-                              # (must be run on the same host as the backend)
+npm run bootstrap             # first-time only: creates default roles + admin user
+                               # (must be run on the same host as the backend)
 ```
 
 Default login after bootstrap: `warehouse` / `warehouse` — change the password immediately.
