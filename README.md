@@ -11,7 +11,23 @@ This is an npm workspaces monorepo — `backend` and `frontend` are separate wor
 
 ## Setup
 
-### 0. Get the code
+### 0. Node.js (build from source)
+
+Requires Node.js 20 (LTS) — `node-cron` 4.x in this project requires Node >=20.
+
+```bash
+sudo apt update && sudo apt install -y python3 g++ make git
+git clone https://github.com/nodejs/node.git
+cd node
+git checkout v20.20.2
+./configure
+make -j$(nproc)   # this takes a while
+sudo make install
+cd ..
+node -v           # should print v20.20.2
+```
+
+### 1. Get the code
 
 Download the latest release into `/opt` (not a clone of `main`, which may contain in-progress work):
 
@@ -25,7 +41,7 @@ cd warehouse   # now /opt/warehouse
 
 Or grab the same archive from the [Releases page](https://github.com/warehouse-inventorymanagement/warehouse/releases/latest).
 
-### 1. Database
+### 2. Database
 
 Requires PostgreSQL. Create a dedicated user and database (run as the `postgres` superuser):
 
@@ -38,7 +54,7 @@ Pick your own password here — this becomes part of `DATABASE_URL` below. If `p
 
 A `setup-database.sh` script exists at the repo root that automates the above, but it unconditionally **drops** any existing `warehouse` user/database first and hardcodes a weak password — only use it for a disposable dev instance, never against a database you care about.
 
-### 2. App
+### 3. App
 
 ```bash
 npm run install:all          # installs root + backend + frontend deps
