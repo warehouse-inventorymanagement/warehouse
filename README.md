@@ -67,10 +67,18 @@ cp backend/.env.example backend/.env
 
 npm run db:push               # sync Prisma schema into the database (creates tables)
 npm run dev                   # backend on :3000, frontend on :5317
-
-npm run bootstrap             # first-time only: creates default roles + admin user
-                               # (must be run on the same host as the backend)
 ```
+
+`npm run dev` runs in the foreground and blocks the terminal, so `npm run bootstrap` (next step) needs to run while it's still up. If you have a second terminal/SSH session, just run `npm run dev` there and `npm run bootstrap` here. On a single session, background it instead:
+
+```bash
+npm run dev > /tmp/warehouse-dev.log 2>&1 &
+sleep 5
+npm run bootstrap             # first-time only: creates default roles + admin user
+                               # (must be run on the same host as the backend, while it's running)
+```
+
+Watch backend logs anytime with `tail -f /tmp/warehouse-dev.log`; stop the backgrounded server later with `kill %1` (or `pkill -f "tsx watch"`).
 
 Default login after bootstrap: `warehouse` / `warehouse` — change the password immediately.
 
