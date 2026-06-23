@@ -1033,14 +1033,15 @@ router.post('/webhooks', requireApiPermission('webhooks:write'), async (req: Req
 router.patch('/webhooks/:id', requireApiPermission('webhooks:write'), async (req: Request, res: Response) => {
   try {
     const { name, url, events, isActive, secret } = req.body;
+    const id = req.params.id as string;
 
-    const existing = await prisma.webhook.findUnique({ where: { id: req.params.id } });
+    const existing = await prisma.webhook.findUnique({ where: { id } });
     if (!existing) {
       return res.status(404).json({ success: false, message: 'Webhook not found' });
     }
 
     const webhook = await prisma.webhook.update({
-      where: { id: req.params.id },
+      where: { id },
       data: {
         ...(name !== undefined && { name }),
         ...(url !== undefined && { url }),
@@ -1082,12 +1083,13 @@ router.patch('/webhooks/:id', requireApiPermission('webhooks:write'), async (req
  */
 router.delete('/webhooks/:id', requireApiPermission('webhooks:delete'), async (req: Request, res: Response) => {
   try {
-    const existing = await prisma.webhook.findUnique({ where: { id: req.params.id } });
+    const id = req.params.id as string;
+    const existing = await prisma.webhook.findUnique({ where: { id } });
     if (!existing) {
       return res.status(404).json({ success: false, message: 'Webhook not found' });
     }
 
-    await prisma.webhook.delete({ where: { id: req.params.id } });
+    await prisma.webhook.delete({ where: { id } });
     res.json({ success: true, message: 'Webhook deleted' });
   } catch (error) {
     console.error('API Error - DELETE /webhooks/:id:', error);
@@ -1136,7 +1138,7 @@ router.delete('/webhooks/:id', requireApiPermission('webhooks:delete'), async (r
  */
 router.post('/webhooks/:id/test', requireApiPermission('webhooks:write'), async (req: Request, res: Response) => {
   try {
-    const webhook = await prisma.webhook.findUnique({ where: { id: req.params.id } });
+    const webhook = await prisma.webhook.findUnique({ where: { id: req.params.id as string } });
     if (!webhook) {
       return res.status(404).json({ success: false, message: 'Webhook not found' });
     }

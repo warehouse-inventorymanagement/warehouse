@@ -27,6 +27,9 @@ npm-debug.log*
 .vscode/
 .idea/
 
+# Local Claude Code tool-permission state (machine-specific, not project config)
+.claude/settings.local.json
+
 # Misc stray/junk files
 _ul
 /testfile

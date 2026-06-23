@@ -64,15 +64,16 @@ router.put('/:id', authenticate, param('id').isUUID(), [
   }),
 ], validate, async (req: AuthRequest, res: Response, next) => {
   try {
+    const id = req.params.id as string;
     const filter = await prisma.savedFilter.updateMany({
-      where: { id: req.params.id, userId: req.user!.id },
+      where: { id, userId: req.user!.id },
       data: {
         ...(req.body.name && { name: req.body.name }),
         ...(req.body.filters && { filters: JSON.stringify(req.body.filters) }),
       },
     });
     if (filter.count === 0) return res.status(404).json({ success: false, message: 'Filter not found' });
-    const updated = await prisma.savedFilter.findUnique({ where: { id: req.params.id } });
+    const updated = await prisma.savedFilter.findUnique({ where: { id } });
     res.json({ success: true, data: { ...updated!, filters: JSON.parse(updated!.filters) } });
   } catch (error) {
     next(error);
@@ -82,7 +83,7 @@ router.put('/:id', authenticate, param('id').isUUID(), [
 // Delete saved filter
 router.delete('/:id', authenticate, param('id').isUUID(), validate, async (req: AuthRequest, res: Response, next) => {
   try {
-    await prisma.savedFilter.deleteMany({ where: { id: req.params.id, userId: req.user!.id } });
+    await prisma.savedFilter.deleteMany({ where: { id: req.params.id as string, userId: req.user!.id } });
     res.json({ success: true });
   } catch (error) {
     next(error);
@@ -99,7 +100,7 @@ router.patch('/:id/default', authenticate, param('id').isUUID(), validate, async
     });
     // Set new default
     await prisma.savedFilter.updateMany({
-      where: { id: req.params.id, userId: req.user!.id },
+      where: { id: req.params.id as string, userId: req.user!.id },
       data: { isDefault: true },
     });
     res.json({ success: true });

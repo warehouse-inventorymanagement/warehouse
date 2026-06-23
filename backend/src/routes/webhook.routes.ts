@@ -108,7 +108,7 @@ router.put('/:id', authenticate, requirePermission(PERMISSIONS.SETTINGS_UPDATE),
     }
 
     const webhook = await prisma.webhook.update({
-      where: { id: req.params.id },
+      where: { id: req.params.id as string },
       data: {
         ...(req.body.name && { name: req.body.name }),
         ...(req.body.url && { url: req.body.url }),
@@ -128,7 +128,7 @@ router.put('/:id', authenticate, requirePermission(PERMISSIONS.SETTINGS_UPDATE),
 // requires SETTINGS_UPDATE permission, making it admin-only by design.
 router.delete('/:id', authenticate, requirePermission(PERMISSIONS.SETTINGS_UPDATE), param('id').isUUID(), validate, async (req: AuthRequest, res: Response, next) => {
   try {
-    await prisma.webhook.delete({ where: { id: req.params.id } });
+    await prisma.webhook.delete({ where: { id: req.params.id as string } });
     res.json({ success: true });
   } catch (error) {
     next(error);
@@ -138,7 +138,7 @@ router.delete('/:id', authenticate, requirePermission(PERMISSIONS.SETTINGS_UPDAT
 // Test webhook
 router.post('/:id/test', authenticate, requirePermission(PERMISSIONS.SETTINGS_UPDATE), param('id').isUUID(), validate, async (req: AuthRequest, res: Response, next) => {
   try {
-    const webhook = await prisma.webhook.findUnique({ where: { id: req.params.id } });
+    const webhook = await prisma.webhook.findUnique({ where: { id: req.params.id as string } });
     if (!webhook) throw new AppError('Webhook not found', 404);
 
     if (await isPrivateUrl(webhook.url)) {

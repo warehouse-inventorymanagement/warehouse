@@ -8,15 +8,13 @@ export default function TimezoneSettings() {
   const [systemTimezone, setSystemTimezone] = useState('UTC');
   const [savingTimezone, setSavingTimezone] = useState(false);
   const [headerShowDateTime, setHeaderShowDateTime] = useState(true);
-  const [notificationSendTime, setNotificationSendTime] = useState('02:00');
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const data = await settingsApi.getAll();
+        const data = (await settingsApi.getAll()).data.data;
         setSystemTimezone(data['system.timezone'] || data['notification.timezone'] || 'UTC');
         setHeaderShowDateTime(data['header.showDateTime'] !== 'false');
-        setNotificationSendTime(data['notification.dailySendTime'] || '02:00');
       } catch {
         toast.error('Failed to load timezone settings');
       } finally {

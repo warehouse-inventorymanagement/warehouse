@@ -128,7 +128,7 @@ export default function NotificationsSettings() {
   useEffect(() => {
     const init = async () => {
       try {
-        const settings = await settingsApi.getAll();
+        const settings = (await settingsApi.getAll()).data.data;
         if (settings['notification.dailySendTime']) {
           setNotificationSendTime(settings['notification.dailySendTime']);
         }

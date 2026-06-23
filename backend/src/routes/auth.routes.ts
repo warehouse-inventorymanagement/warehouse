@@ -378,7 +378,7 @@ router.post(
         username: result.user.username,
         success: true,
         userId: result.user.id,
-        authMethod: '2fa',
+        authMethod: result.user.isLdap ? 'ldap' : 'local',
         platform: 'web',
         req,
       });

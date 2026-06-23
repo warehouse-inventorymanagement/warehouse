@@ -33,7 +33,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response, next) => {
 router.delete('/:id', authenticate, param('id').isUUID(), validate, async (req: AuthRequest, res: Response, next) => {
   try {
     await prisma.userSession.deleteMany({
-      where: { id: req.params.id, userId: req.user!.id },
+      where: { id: req.params.id as string, userId: req.user!.id },
     });
     res.json({ success: true });
   } catch (error) {

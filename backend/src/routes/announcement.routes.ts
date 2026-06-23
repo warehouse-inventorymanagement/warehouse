@@ -226,12 +226,13 @@ router.put('/templates/:id',
   validate,
   async (req: AuthRequest, res: Response, next) => {
     try {
-      const template = await prisma.announcementTemplate.findUnique({ where: { id: req.params.id } });
+      const id = req.params.id as string;
+      const template = await prisma.announcementTemplate.findUnique({ where: { id } });
       if (!template) throw new AppError('Template not found', 404);
       if (template.isBuiltIn) throw new AppError('Cannot edit built-in templates', 400);
       const { name, titlePrefix, messageTemplate, icon, color } = req.body;
       const updated = await prisma.announcementTemplate.update({
-        where: { id: req.params.id },
+        where: { id },
         data: {
           ...(name !== undefined && { name }),
           ...(titlePrefix !== undefined && { titlePrefix: titlePrefix || null }),
@@ -255,10 +256,11 @@ router.delete('/templates/:id',
   validate,
   async (req: AuthRequest, res: Response, next) => {
     try {
-      const template = await prisma.announcementTemplate.findUnique({ where: { id: req.params.id } });
+      const id = req.params.id as string;
+      const template = await prisma.announcementTemplate.findUnique({ where: { id } });
       if (!template) throw new AppError('Template not found', 404);
       if (template.isBuiltIn) throw new AppError('Cannot delete built-in templates', 400);
-      await prisma.announcementTemplate.delete({ where: { id: req.params.id } });
+      await prisma.announcementTemplate.delete({ where: { id } });
       res.json({ success: true, message: 'Template deleted' });
     } catch (error) {
       next(error);
@@ -354,7 +356,7 @@ router.put('/:id',
   validate,
   async (req: AuthRequest, res: Response, next) => {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const existing = await prisma.announcement.findUnique({ where: { id } });
       if (!existing) throw new AppError('Announcement not found', 404);
 
@@ -426,7 +428,7 @@ router.post('/:id/duplicate',
   validate,
   async (req: AuthRequest, res: Response, next) => {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const source = await prisma.announcement.findUnique({ where: { id } });
       if (!source) throw new AppError('Announcement not found', 404);
 
@@ -477,7 +479,7 @@ router.post('/:id/dismiss',
   validate,
   async (req: AuthRequest, res: Response, next) => {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const announcement = await prisma.announcement.findUnique({ where: { id } });
       if (!announcement) throw new AppError('Announcement not found', 404);
       if (announcement.dismissType === 'none') throw new AppError('This announcement cannot be dismissed', 400);
@@ -502,9 +504,10 @@ router.post('/:id/read',
   validate,
   async (req: AuthRequest, res: Response, next) => {
     try {
+      const id = req.params.id as string;
       await prisma.announcementRead.upsert({
-        where: { userId_announcementId: { userId: req.user!.id, announcementId: req.params.id } },
-        create: { userId: req.user!.id, announcementId: req.params.id },
+        where: { userId_announcementId: { userId: req.user!.id, announcementId: id } },
+        create: { userId: req.user!.id, announcementId: id },
         update: {},
       });
       res.json({ success: true });
@@ -523,7 +526,7 @@ router.get('/:id/reads',
   async (req: AuthRequest, res: Response, next) => {
     try {
       const reads = await prisma.announcementRead.findMany({
-        where: { announcementId: req.params.id },
+        where: { announcementId: req.params.id as string },
         include: {
           user: { select: { id: true, username: true, firstName: true, lastName: true, email: true } },
         },
@@ -544,7 +547,7 @@ router.delete('/:id',
   validate,
   async (req: AuthRequest, res: Response, next) => {
     try {
-      const { id } = req.params;
+      const { id } = req.params as { id: string };
       const existing = await prisma.announcement.findUnique({ where: { id } });
       if (!existing) throw new AppError('Announcement not found', 404);
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  DocumentTextIcon,
   KeyIcon,
   ClipboardDocumentIcon,
   LinkIcon,
