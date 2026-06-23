@@ -33,9 +33,9 @@ Download the latest release into `/opt` (not a clone of `main`, which may contai
 
 ```bash
 cd /opt
-sudo curl -LO https://github.com/warehouse-inventorymanagement/warehouse/releases/download/v1.1.0/warehouse-v1.1.0.tar.gz
-sudo tar xzf warehouse-v1.1.0.tar.gz
-sudo rm warehouse-v1.1.0.tar.gz
+sudo curl -LO https://github.com/warehouse-inventorymanagement/warehouse/releases/download/v1.1.1/warehouse-v1.1.1.tar.gz
+sudo tar xzf warehouse-v1.1.1.tar.gz
+sudo rm warehouse-v1.1.1.tar.gz
 cd warehouse   # now /opt/warehouse
 ```
 
