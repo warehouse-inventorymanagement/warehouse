@@ -13,12 +13,14 @@ This is an npm workspaces monorepo — `backend` and `frontend` are separate wor
 
 ### 0. Get the code
 
-Download the latest release (not a clone of `main`, which may contain in-progress work):
+Download the latest release into `/opt` (not a clone of `main`, which may contain in-progress work):
 
 ```bash
-curl -LO https://github.com/warehouse-inventorymanagement/warehouse/releases/download/v1.1.0/warehouse-v1.1.0.tar.gz
-tar xzf warehouse-v1.1.0.tar.gz
-cd warehouse
+sudo mkdir -p /opt && cd /opt
+sudo curl -LO https://github.com/warehouse-inventorymanagement/warehouse/releases/download/v1.1.0/warehouse-v1.1.0.tar.gz
+sudo tar xzf warehouse-v1.1.0.tar.gz
+sudo rm warehouse-v1.1.0.tar.gz
+cd warehouse   # now /opt/warehouse
 ```
 
 Or grab the same archive from the [Releases page](https://github.com/warehouse-inventorymanagement/warehouse/releases/latest).
