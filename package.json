@@ -1,0 +1,33 @@
+{
+  "name": "warehouse",
+  "version": "1.1.0",
+  "description": "Warehouse Inventory Management System",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev -w backend\" \"npm run dev -w frontend -- --host --port 5317\"",
+    "install:all": "npm install && npm install -w backend && npm install -w frontend",
+    "build": "npm run build -w frontend",
+    "start": "npm run dev -w backend",
+    "db:push": "cd backend && npx prisma db push",
+    "db:reset": "cd backend && npx prisma db push --force-reset",
+    "db:studio": "cd backend && npx prisma studio",
+    "bootstrap": "curl -X POST http://127.0.0.1:3000/api/roles/bootstrap && curl -X POST http://127.0.0.1:3000/api/roles/reset-admin"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@otplib/preset-default": "^12.0.1",
+    "@types/dagre": "^0.7.54",
+    "@xyflow/react": "^12.10.1",
+    "dagre": "^0.8.5",
+    "qrcode": "^1.5.4",
+    "react-image-crop": "^11.0.10"
+  }
+}

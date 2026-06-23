@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment files (never commit real secrets)
+.env
+.env.local
+.env.*.local
+
+# Prisma generated client (regenerated via `prisma generate`)
+backend/src/generated/
+
+# User-uploaded content and local backups
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/backups/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor/OS
+.DS_Store
+.vscode/
+.idea/
+
+# Misc stray/junk files
+_ul
+/testfile
+/warehouse.zip

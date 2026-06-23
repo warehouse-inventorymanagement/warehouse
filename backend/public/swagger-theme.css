@@ -1,0 +1,131 @@
+/* Warehouse API Docs - Dark Theme */
+
+/* Hide default topbar */
+.swagger-ui .topbar { display: none !important; }
+
+/* Dark theme background */
+body { background-color: #0a0a0f !important; }
+.swagger-ui { background-color: #0a0a0f !important; }
+.swagger-ui .scheme-container { background-color: #12121a !important; box-shadow: none !important; }
+.swagger-ui .opblock-tag { border-bottom-color: #1e1e2e !important; }
+.swagger-ui section.models { border-color: #1e1e2e !important; }
+.swagger-ui section.models.is-open h4 { border-bottom-color: #1e1e2e !important; }
+.swagger-ui .model-container { background: #12121a !important; }
+.swagger-ui .models-control { background: #12121a !important; }
+.swagger-ui .opblock { border-color: #1e1e2e !important; background: #12121a !important; box-shadow: none !important; }
+.swagger-ui .opblock .opblock-summary { border-color: #1e1e2e !important; }
+.swagger-ui .opblock-body { background: #0a0a0f !important; }
+.swagger-ui .opblock-body pre.microlight { background: #1e1e2e !important; }
+.swagger-ui .opblock-section-header { background: #1a1a24 !important; box-shadow: none !important; }
+.swagger-ui table thead tr td, .swagger-ui table thead tr th { border-bottom-color: #1e1e2e !important; color: #e0e0e0 !important; }
+.swagger-ui .response-col_status { color: #e0e0e0 !important; }
+.swagger-ui .tab li { color: #a0a0a0 !important; }
+.swagger-ui .tab li.active { color: #ffffff !important; }
+.swagger-ui .btn { border-color: #3e3e5e !important; }
+.swagger-ui select { background: #1e1e2e !important; border-color: #3e3e5e !important; color: #e0e0e0 !important; }
+.swagger-ui input[type=text], .swagger-ui textarea { background: #1e1e2e !important; border-color: #3e3e5e !important; color: #e0e0e0 !important; }
+.swagger-ui .parameter__name { color: #e0e0e0 !important; }
+.swagger-ui .parameter__type { color: #6366f1 !important; }
+.swagger-ui .parameter__in { color: #888 !important; }
+.swagger-ui table tbody tr td { border-bottom-color: #1e1e2e !important; color: #c0c0c0 !important; }
+.swagger-ui .wrapper { background: #0a0a0f !important; }
+.swagger-ui .information-container { background: #0a0a0f !important; }
+
+/* Text colors */
+.swagger-ui, .swagger-ui .info .title, .swagger-ui .opblock-tag { color: #ffffff !important; }
+.swagger-ui .info .title small.version-stamp { background-color: #6366f1 !important; }
+.swagger-ui .info p, .swagger-ui .info li, .swagger-ui .info table { color: #a0a0b0 !important; }
+.swagger-ui .opblock-description-wrapper p, .swagger-ui .opblock-external-docs-wrapper p { color: #a0a0b0 !important; }
+.swagger-ui .opblock .opblock-summary-description { color: #a0a0b0 !important; }
+.swagger-ui .opblock-tag small { color: #888 !important; }
+.swagger-ui .model-title { color: #e0e0e0 !important; }
+.swagger-ui .model { color: #c0c0c0 !important; }
+.swagger-ui .prop-type { color: #6366f1 !important; }
+.swagger-ui .prop-format { color: #888 !important; }
+.swagger-ui .renderedMarkdown p, .swagger-ui .renderedMarkdown li { color: #a0a0b0 !important; }
+.swagger-ui .markdown h1, .swagger-ui .markdown h2, .swagger-ui .markdown h3, .swagger-ui .markdown h4, .swagger-ui .markdown h5 { color: #ffffff !important; }
+
+/* Method colors */
+.swagger-ui .opblock.opblock-get { background: rgba(99, 102, 241, 0.1) !important; border-color: #6366f1 !important; }
+.swagger-ui .opblock.opblock-get .opblock-summary-method { background: #6366f1 !important; }
+.swagger-ui .opblock.opblock-get .opblock-summary { border-color: #6366f1 !important; }
+.swagger-ui .opblock.opblock-get .tab-header .tab-item.active h4 span::after { background: #6366f1 !important; }
+
+.swagger-ui .opblock.opblock-post { background: rgba(34, 197, 94, 0.1) !important; border-color: #22c55e !important; }
+.swagger-ui .opblock.opblock-post .opblock-summary-method { background: #22c55e !important; }
+.swagger-ui .opblock.opblock-post .opblock-summary { border-color: #22c55e !important; }
+
+.swagger-ui .opblock.opblock-put { background: rgba(249, 115, 22, 0.1) !important; border-color: #f97316 !important; }
+.swagger-ui .opblock.opblock-put .opblock-summary-method { background: #f97316 !important; }
+.swagger-ui .opblock.opblock-put .opblock-summary { border-color: #f97316 !important; }
+
+.swagger-ui .opblock.opblock-patch { background: rgba(234, 179, 8, 0.1) !important; border-color: #eab308 !important; }
+.swagger-ui .opblock.opblock-patch .opblock-summary-method { background: #eab308 !important; }
+.swagger-ui .opblock.opblock-patch .opblock-summary { border-color: #eab308 !important; }
+
+.swagger-ui .opblock.opblock-delete { background: rgba(239, 68, 68, 0.1) !important; border-color: #ef4444 !important; }
+.swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #ef4444 !important; }
+.swagger-ui .opblock.opblock-delete .opblock-summary { border-color: #ef4444 !important; }
+
+/* Buttons */
+.swagger-ui .btn.execute { background-color: #6366f1 !important; border-color: #6366f1 !important; color: white !important; }
+.swagger-ui .btn.execute:hover { background-color: #5558e3 !important; }
+.swagger-ui .btn.cancel { background-color: #ef4444 !important; border-color: #ef4444 !important; }
+.swagger-ui .btn-group .btn { background: #1e1e2e !important; border-color: #3e3e5e !important; color: #e0e0e0 !important; }
+.swagger-ui .btn.authorize { background-color: #22c55e !important; border-color: #22c55e !important; color: white !important; }
+.swagger-ui .btn.authorize svg { fill: white !important; }
+.swagger-ui .authorization__btn svg { fill: #888 !important; }
+.swagger-ui .authorization__btn.locked svg { fill: #22c55e !important; }
+
+/* Response */
+.swagger-ui .responses-inner { background: #0a0a0f !important; }
+.swagger-ui .response-col_description { color: #a0a0b0 !important; }
+.swagger-ui .microlight { color: #e0e0e0 !important; background: #1e1e2e !important; }
+.swagger-ui .highlight-code { background: #1e1e2e !important; }
+
+/* Authorize modal */
+.swagger-ui .dialog-ux .modal-ux { background: #12121a !important; border-color: #1e1e2e !important; }
+.swagger-ui .dialog-ux .modal-ux-header h3 { color: #ffffff !important; }
+.swagger-ui .dialog-ux .modal-ux-content p { color: #a0a0b0 !important; }
+.swagger-ui .dialog-ux .modal-ux-content label { color: #e0e0e0 !important; }
+.swagger-ui .auth-container { border-color: #1e1e2e !important; }
+.swagger-ui .dialog-ux .modal-ux-header { border-bottom-color: #1e1e2e !important; }
+.swagger-ui .modal-ux-content .wrapper { background: #12121a !important; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0a0a0f; }
+::-webkit-scrollbar-thumb { background: #3e3e5e; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #5e5e7e; }
+
+/* Code blocks */
+.swagger-ui .highlight-code > .microlight code { color: #e0e0e0 !important; }
+.swagger-ui .renderedMarkdown code { background: #1e1e2e !important; color: #6366f1 !important; padding: 2px 6px; border-radius: 4px; }
+.swagger-ui pre { background: #1e1e2e !important; }
+.swagger-ui pre code { color: #e0e0e0 !important; }
+.swagger-ui .copy-to-clipboard { background: #1e1e2e !important; }
+.swagger-ui .copy-to-clipboard button { background: #3e3e5e !important; }
+
+/* Links */
+.swagger-ui a { color: #6366f1 !important; }
+.swagger-ui a:hover { color: #818cf8 !important; }
+
+/* JSON Schema */
+.swagger-ui .model-box { background: #1e1e2e !important; }
+.swagger-ui .model .property.primitive { color: #a0a0b0 !important; }
+
+/* Loading */
+.swagger-ui .loading-container { background: #0a0a0f !important; }
+.swagger-ui .loading-container .loading::after { color: #6366f1 !important; }
+
+/* Try it out section */
+.swagger-ui .try-out__btn { border-color: #6366f1 !important; color: #6366f1 !important; }
+.swagger-ui .try-out__btn:hover { background: rgba(99, 102, 241, 0.1) !important; }
+
+/* Server dropdown */
+.swagger-ui .servers > label { color: #e0e0e0 !important; }
+.swagger-ui .servers-title { color: #e0e0e0 !important; }
+
+/* Expand/collapse arrow */
+.swagger-ui .expand-operation svg { fill: #888 !important; }
+.swagger-ui .expand-operation:hover svg { fill: #e0e0e0 !important; }

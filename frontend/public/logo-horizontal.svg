@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40" fill="currentColor">
+  <!-- Icon - scaled to match text height -->
+  <g transform="translate(0, 3) scale(1.4)" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <polyline points="9 22 9 12 15 12 15 22"/>
+  </g>
+
+  <!-- Text: "Warehouse" bold -->
+  <text x="38" y="17" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="700" fill="currentColor">
+    Warehouse
+  </text>
+
+  <!-- Text: "Inventory Management" thin, below -->
+  <text x="38" y="32" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="300" fill="currentColor" opacity="0.7">
+    Inventory Management
+  </text>
+</svg>

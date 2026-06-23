@@ -1,0 +1,842 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  permissions String[] // Array of permission strings like "items:create", "items:delete"
+  isSystem    Boolean  @default(false) @map("is_system") // System roles cannot be deleted
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users User[]
+  ldapUsers User[] @relation("LdapRole") // Users whose LDAP-determined role is this
+  groups Group[]
+
+  @@map("roles")
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  roleId      String   @map("role_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  role  Role        @relation(fields: [roleId], references: [id])
+  users UserGroup[]
+
+  @@map("groups")
+}
+
+model UserGroup {
+  userId    String   @map("user_id")
+  groupId   String   @map("group_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([userId, groupId])
+  @@map("user_groups")
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  username            String    @unique
+  email               String    @unique
+  firstName           String?   @map("first_name")
+  lastName            String?   @map("last_name")
+  employeeId          String?   @map("employee_id")
+  phone               String?
+  address             String?
+  gender              String?   // male, female (or LDAP-provided value)
+  passwordHash        String?   @map("password_hash")
+  roleId              String?   @map("role_id") // Direct role assignment (deprecated, use groups)
+  ldapRoleId          String?   @map("ldap_role_id") // Role determined by LDAP groups (fallback)
+  ldapDn              String?   @map("ldap_dn")
+  avatarPath          String?   @map("avatar_path")
+  isActive            Boolean   @default(true) @map("is_active")
+  canAccessQuarantine Boolean   @default(false) @map("can_access_quarantine")
+  resetToken          String?   @map("reset_token")
+  resetTokenExp       DateTime? @map("reset_token_exp")
+  twoFactorEnabled    Boolean   @default(false) @map("two_factor_enabled")
+  twoFactorSecret     String?   @map("two_factor_secret")
+  twoFactorMethod     String?   @map("two_factor_method") // 'totp' | 'email'
+  twoFactorBackupCodes String[] @map("two_factor_backup_codes") // hashed codes
+  twoFactorEmailCode  String?   @map("two_factor_email_code")
+  twoFactorEmailExp   DateTime? @map("two_factor_email_exp")
+  passwordChangedAt   DateTime? @map("password_changed_at")
+  loginIpWhitelist    String[]  @map("login_ip_whitelist") // Empty = allow all
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  role            Role?       @relation(fields: [roleId], references: [id])
+  ldapRole        Role?       @relation("LdapRole", fields: [ldapRoleId], references: [id])
+  groups          UserGroup[]
+  items           Item[]
+  deletedItems    Item[]      @relation("DeletedItems")
+  deletedImages   ItemImage[] @relation("DeletedImages")
+  itemHistory     ItemHistory[]
+  auditLogs       AuditLog[]
+  refreshTokens       RefreshToken[]
+  devices             Device[]
+  blockedDevices      DeviceBlocklist[]
+  customIcons         CustomIcon[]
+  customizedIcons CustomizedIcon[]
+  apiKeys         ApiKey[]
+  announcements   Announcement[]
+  announcementDismissals AnnouncementDismissal[]
+  announcementReads      AnnouncementRead[]
+  announcementTemplates  AnnouncementTemplate[]
+  watchedItems           ItemWatch[]
+  itemVersions           ItemVersion[]
+  savedFilters           SavedFilter[]
+  dashboardConfig        DashboardConfig?
+  importHistory          ImportHistory[]
+  webhooks               Webhook[]
+  sessions               UserSession[]
+
+  @@index([isActive])
+  @@index([roleId])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  deviceId  String?  @map("device_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  device Device? @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model Device {
+  id             String    @id @default(uuid())
+  userId         String    @map("user_id")
+  name           String
+  deviceUuid     String?   @map("device_uuid")  // Android ID or app-generated UUID
+  imei           String?
+  serialNumber   String?   @map("serial_number")
+  androidVersion String?   @map("android_version")
+  manufacturer   String?
+  model          String?
+  deviceHash     String    @unique @map("device_hash")
+  isBlocked      Boolean   @default(false) @map("is_blocked")
+  blockedAt      DateTime? @map("blocked_at")
+  blockedReason  String?   @map("blocked_reason")
+  lastActiveAt   DateTime? @map("last_active_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+
+  @@index([userId])
+  @@index([deviceHash])
+  @@map("devices")
+}
+
+model DeviceBlocklist {
+  id            String    @id @default(uuid())
+  deviceHash    String    @unique @map("device_hash")
+  reason        String?
+  blockedAt     DateTime  @default(now()) @map("blocked_at")
+  blockedById   String?   @map("blocked_by_id")
+  deviceName    String?   @map("device_name")
+  deviceUuid    String?   @map("device_uuid")
+  manufacturer  String?
+  model         String?
+  userId        String?   @map("user_id")
+
+  blockedBy     User?     @relation(fields: [blockedById], references: [id])
+
+  @@map("device_blocklist")
+}
+
+model Category {
+  id                  String     @id @default(uuid())
+  name                String
+  description         String?
+  icon                String?    // Icon identifier (e.g., mdi:car, ic:baseline-home)
+  iconSize            String     @default("medium") @map("icon_size") // small, medium, large
+  iconColor           String?    @map("icon_color") // Hex color for the icon (monochrome icons only)
+  iconBackgroundColor String?    @map("icon_background_color") // Background color behind the icon
+  parentId            String?    @map("parent_id")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  items    Item[]
+  attributeTemplates AttributeTemplate[]
+
+  @@index([parentId])
+  @@index([name])
+  @@map("categories")
+}
+
+model Tag {
+  id                  String   @id @default(uuid())
+  name                String   @unique
+  color               String   @default("#6B7280") // Tag badge color
+  icon                String?  // Icon identifier (e.g., mdi:car, ic:baseline-home)
+  iconSize            String   @default("medium") @map("icon_size") // small, medium, large
+  iconColor           String?  @map("icon_color") // Icon fill color (monochrome icons only)
+  iconBackgroundColor String?  @map("icon_background_color") // Background behind the icon
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  items ItemTag[]
+
+  @@map("tags")
+}
+
+model Location {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  type        String   @default("location") // location, room, zone, aisle, row, bay, shelf, bin, box
+  address     String?  // Physical address (for main locations)
+  barcode     String?  @unique // Auto-generated unique code like "LOC-BIN-A1B2C3"
+  parentId    String?  @map("parent_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  capacity    Int?     // Maximum number of items this location can hold
+  currentLoad Int      @default(0) @map("current_load") // Current number of items stored
+
+  parent   Location?  @relation("LocationHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children Location[] @relation("LocationHierarchy")
+  items    Item[]
+
+  @@index([parentId])
+  @@index([name])
+  @@index([type])
+  @@map("locations")
+}
+
+model Item {
+  id          String    @id @default(uuid())
+  name        String
+  sku         String?   @unique
+  description String?
+  categoryId  String?   @map("category_id")
+  locationId  String?   @map("location_id")
+  templateId  String?   @map("template_id")
+  quantity    Int       @default(0)
+  minQuantity Int       @default(0) @map("min_quantity")
+  createdById String    @map("created_by_id")
+  deletedAt   DateTime? @map("deleted_at")
+  deletedById String?   @map("deleted_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  category   Category?     @relation(fields: [categoryId], references: [id])
+  location   Location?     @relation(fields: [locationId], references: [id])
+  template   ItemTemplate? @relation(fields: [templateId], references: [id])
+  createdBy  User          @relation(fields: [createdById], references: [id])
+  deletedBy  User?         @relation("DeletedItems", fields: [deletedById], references: [id])
+
+  tags       ItemTag[]
+  images     ItemImage[]
+  attributes ItemAttribute[]
+  history    ItemHistory[]
+
+  is360Set  Boolean @default(false) @map("is_360_set")
+
+  // Pricing
+  price             Decimal?  @db.Decimal(12, 4)
+  currency          String?   @db.VarChar(3)  // ISO 4217 code (USD, EUR, etc.)
+
+  // Serial number tracking
+  trackSerialNumbers Boolean @default(false) @map("track_serial_numbers")
+
+  parentItems   SubItem[] @relation("ChildItem")
+  subItems      SubItem[] @relation("ParentItem")
+  model3d       ItemModel3D?
+  announcements Announcement[]
+  watchers      ItemWatch[]
+  versions      ItemVersion[]
+  instances     ItemInstance[]
+  linkedFrom    ItemLink[] @relation("LinkFrom")
+  linkedTo      ItemLink[] @relation("LinkTo")
+
+  @@index([categoryId])
+  @@index([locationId])
+  @@index([createdById])
+  @@index([name])
+  @@index([deletedAt])
+  @@index([createdAt])
+  @@map("items")
+}
+
+model ItemTag {
+  itemId String @map("item_id")
+  tagId  String @map("tag_id")
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, tagId])
+  @@map("item_tags")
+}
+
+model ItemImage {
+  id              String   @id @default(uuid())
+  itemId          String   @map("item_id")
+  filename        String
+  originalName    String   @map("original_name")
+  mimeType        String   @map("mime_type")
+  size            Int
+  isPrimary       Boolean  @default(false) @map("is_primary")
+  backgroundColor String?  @map("background_color") // Hex color or null for transparent
+  sortOrder       Int      @default(0) @map("sort_order")
+  uploadedAt      DateTime @default(now()) @map("uploaded_at")
+  deletedAt       DateTime? @map("deleted_at")
+  deletedById     String?   @map("deleted_by_id")
+
+  item      Item  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  deletedBy User? @relation("DeletedImages", fields: [deletedById], references: [id])
+
+  @@index([itemId])
+  @@map("item_images")
+}
+
+model ItemModel3D {
+  id           String   @id @default(uuid())
+  itemId       String   @unique @map("item_id")
+  filename     String
+  originalName String   @map("original_name")
+  mimeType     String   @map("mime_type")
+  size         Int
+  uploadedAt   DateTime @default(now()) @map("uploaded_at")
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@map("item_models_3d")
+}
+
+model ItemAttribute {
+  id             String @id @default(uuid())
+  itemId         String @map("item_id")
+  attributeName  String @map("attribute_name")
+  attributeValue String @map("attribute_value")
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, attributeName])
+  @@map("item_attributes")
+}
+
+model AttributeTemplate {
+  id            String  @id @default(uuid())
+  categoryId    String  @map("category_id")
+  attributeName String  @map("attribute_name")
+  attributeType String  @default("text") @map("attribute_type")
+  options       String? // JSON array for select options
+  isRequired    Boolean @default(false) @map("is_required")
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, attributeName])
+  @@map("attribute_templates")
+}
+
+model ItemHistory {
+  id          String   @id @default(uuid())
+  itemId      String   @map("item_id")
+  userId      String   @map("user_id")
+  action      String
+  oldQuantity Int?     @map("old_quantity")
+  newQuantity Int?     @map("new_quantity")
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([itemId, createdAt])
+  @@map("item_history")
+}
+
+model SubItem {
+  id               String  @id @default(uuid())
+  parentItemId     String  @map("parent_item_id")
+  childItemId      String  @map("child_item_id")
+  quantityRequired Int     @default(1) @map("quantity_required")
+  partNumber       String? @map("part_number")
+  notes            String?
+  sortOrder        Int     @default(0) @map("sort_order")
+
+  parentItem Item @relation("ParentItem", fields: [parentItemId], references: [id], onDelete: Cascade)
+  childItem  Item @relation("ChildItem", fields: [childItemId], references: [id], onDelete: Cascade)
+
+  @@unique([parentItemId, childItemId])
+  @@map("sub_items")
+}
+
+model ItemLink {
+  id          String   @id @default(uuid())
+  itemAId     String   @map("item_a_id")
+  itemBId     String   @map("item_b_id")
+  linkType    String   @map("link_type")  // "related", "accessory", "alternative"
+  notes       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  itemA Item @relation("LinkFrom", fields: [itemAId], references: [id], onDelete: Cascade)
+  itemB Item @relation("LinkTo", fields: [itemBId], references: [id], onDelete: Cascade)
+
+  @@unique([itemAId, itemBId])
+  @@index([itemAId])
+  @@index([itemBId])
+  @@map("item_links")
+}
+
+model ItemInstance {
+  id             String    @id @default(uuid())
+  itemId         String    @map("item_id")
+  serialNumber   String    @map("serial_number")
+  status         String    @default("in_stock")  // in_stock, checked_out, rma, retired
+  condition      String    @default("new")        // new, used, refurbished, damaged
+  notes          String?
+  acquiredDate   DateTime? @map("acquired_date")
+  warrantyExpiry DateTime? @map("warranty_expiry")
+  purchasePrice  Decimal?  @map("purchase_price") @db.Decimal(12, 4)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, serialNumber])
+  @@index([itemId])
+  @@index([serialNumber])
+  @@index([status])
+  @@map("item_instances")
+}
+
+model ItemTemplate {
+  id                  String   @id @default(uuid())
+  name                String   @unique
+  description         String?
+  icon                String?
+  iconColor           String?  @map("icon_color")
+  iconBackgroundColor String?  @map("icon_background_color")
+  fieldGroups         String?  @map("field_groups")
+  parentId            String?  @map("parent_id") // Template inheritance
+  isActive            Boolean  @default(true) @map("is_active")
+  isStarter           Boolean  @default(false) @map("is_starter")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  parent         ItemTemplate?  @relation("TemplateHierarchy", fields: [parentId], references: [id])
+  children       ItemTemplate[] @relation("TemplateHierarchy")
+  fields         ItemTemplateField[]
+  suggestedItems ItemTemplateSuggestedSubItem[] @relation("SuggestingTemplate")
+  suggestedBy    ItemTemplateSuggestedSubItem[] @relation("SuggestedTemplate")
+  items          Item[]
+
+  @@map("item_templates")
+}
+
+model ItemTemplateField {
+  id           String  @id @default(uuid())
+  templateId   String  @map("template_id")
+  fieldName    String  @map("field_name")
+  fieldType    String  @default("text") @map("field_type") // text, number, select, boolean, date, url, unit
+  isRequired   Boolean @default(false) @map("is_required")
+  defaultValue String? @map("default_value")
+  options      String? // JSON array for select options
+  unitType     String? @map("unit_type") // voltage, amperage, length, weight, etc.
+  unitOptions  String? @map("unit_options") // JSON array of valid units: ["V", "mV"]
+  sortOrder    Int     @default(0) @map("sort_order")
+
+  // Enhanced field properties
+  fieldGroup   String? @map("field_group") // Group name for organizing fields (e.g., "Electrical", "Physical", "Network")
+  placeholder  String? // Placeholder text for input fields
+  helpText     String? @map("help_text") // Help text/description shown below the field
+  prefix       String? // Text prefix (e.g., "$", "#")
+  suffix       String? // Text suffix (e.g., "units", "pcs")
+  minValue     Float?  @map("min_value") // Minimum value for number fields
+  maxValue     Float?  @map("max_value") // Maximum value for number fields
+  pattern      String? // Regex pattern for text validation
+
+  // Conditional visibility: JSON {fieldName: string, operator: 'eq'|'neq'|'contains', value: string}
+  showCondition String? @map("show_condition")
+
+  template ItemTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, fieldName])
+  @@map("item_template_fields")
+}
+
+model ItemTemplateSuggestedSubItem {
+  id                  String  @id @default(uuid())
+  templateId          String  @map("template_id")
+  suggestedTemplateId String  @map("suggested_template_id")
+  description         String?
+  quantityRequired    Int     @default(1) @map("quantity_required")
+  sortOrder           Int     @default(0) @map("sort_order")
+
+  template          ItemTemplate @relation("SuggestingTemplate", fields: [templateId], references: [id], onDelete: Cascade)
+  suggestedTemplate ItemTemplate @relation("SuggestedTemplate", fields: [suggestedTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, suggestedTemplateId])
+  @@map("item_template_suggested_sub_items")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String?  @map("user_id")
+  action       String   // CREATE, UPDATE, DELETE, LOGIN_SUCCESS, LOGIN_FAILED
+  entityType   String   @map("entity_type") // item, category, location, tag, user, role, auth
+  entityId     String   @map("entity_id")
+  entityName   String?  @map("entity_name") // For display purposes
+  changes      String?  // JSON string of {field: {old: value, new: value}}
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+model CustomIcon {
+  id        String   @id @default(uuid())
+  name      String   @unique // Full icon name like "mdi:car" or "fa:star"
+  prefix    String   // Icon set prefix like "mdi", "fa", etc.
+  svgData   String   @map("svg_data") @db.Text // The actual SVG content
+  createdAt DateTime @default(now()) @map("created_at")
+  createdById String @map("created_by_id")
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@index([prefix])
+  @@map("custom_icons")
+}
+
+model CustomizedIcon {
+  id              String   @id @default(uuid())
+  name            String   // User-defined display name
+  sourceIcon      String   @map("source_icon") // Original icon name (e.g., "mdi:car" or imported icon name)
+  iconColor       String?  @map("icon_color") // Hex color for monochrome icons
+  backgroundColor String?  @map("background_color") // Background color (supports alpha)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdById     String   @map("created_by_id")
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@unique([name, createdById]) // Each user can have unique named customizations
+  @@index([createdById])
+  @@map("customized_icons")
+}
+
+model NotificationConfig {
+  id                String    @id @default(uuid())
+  type              String    @unique // 'low_stock', 'item_quarantined', 'quarantine_expiring', etc.
+  enabled           Boolean   @default(true)
+  frequency         String    @default("immediate") // 'immediate', 'daily', 'every_2_days', 'every_3_days', 'every_4_days', 'weekly'
+  recipientRoleIds  String[]  @map("recipient_role_ids")
+  recipientGroupIds String[]  @map("recipient_group_ids")
+  recipientUserIds  String[]  @map("recipient_user_ids")
+  lastSentAt        DateTime? @map("last_sent_at") // Track when notification was last sent
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  pendingEvents     PendingNotificationEvent[]
+
+  @@map("notification_configs")
+}
+
+model PendingNotificationEvent {
+  id                   String   @id @default(uuid())
+  notificationConfigId String   @map("notification_config_id")
+  eventType            String   @map("event_type") // Same as NotificationType
+  eventData            String   // JSON-serialized event data
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  notificationConfig   NotificationConfig @relation(fields: [notificationConfigId], references: [id], onDelete: Cascade)
+
+  @@index([notificationConfigId])
+  @@index([eventType])
+  @@map("pending_notification_events")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid())
+  name        String    // User-friendly name/description
+  keyHash     String    @unique @map("key_hash") // SHA-256 hash of the API key
+  keyPrefix   String    @map("key_prefix") // First 8 characters for identification (e.g., "wh_abc123")
+  permissions String[]  // Array of permissions: "items:read", "items:write", "categories:read", etc.
+  userId      String    @map("user_id") // Who created/owns this key
+  isActive    Boolean   @default(true) @map("is_active")
+  expiresAt   DateTime? @map("expires_at") // Optional expiration
+  lastUsedAt  DateTime? @map("last_used_at")
+  lastUsedIp  String?   @map("last_used_ip")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // IP Restrictions
+  ipRestrictionMode String   @default("none") @map("ip_restriction_mode") // "none", "whitelist", "blacklist"
+  ipWhitelist       String[] @map("ip_whitelist") // Allowed IPs/CIDRs
+  ipBlacklist       String[] @map("ip_blacklist") // Blocked IPs/CIDRs
+
+  // Rate Limiting (null = use default)
+  rateLimitPerMinute Int? @map("rate_limit_per_minute")
+  rateLimitPerHour   Int? @map("rate_limit_per_hour")
+  rateLimitPerDay    Int? @map("rate_limit_per_day")
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usage ApiKeyUsage[]
+
+  @@index([keyPrefix])
+  @@index([userId])
+  @@map("api_keys")
+}
+
+model ApiKeyUsage {
+  id         String   @id @default(uuid())
+  apiKeyId   String   @map("api_key_id")
+  endpoint   String   // e.g., "/api/v1/items"
+  method     String   // GET, POST, PUT, DELETE
+  statusCode Int      @map("status_code")
+  responseMs Int      @map("response_ms") // Response time in milliseconds
+  requestIp  String   @map("request_ip")
+  timestamp  DateTime @default(now())
+
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@index([apiKeyId, timestamp])
+  @@index([timestamp])
+  @@map("api_key_usage")
+}
+
+model Announcement {
+  id          String    @id @default(uuid())
+  title       String
+  message     String
+  type        String    @default("info")
+  icon        String?
+  color       String?   @default("#3b82f6")
+  isActive    Boolean   @default(true) @map("is_active")
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  createdById String    @map("created_by_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Item link OR action URL (mutually exclusive, enforced in API)
+  linkedItemId   String?  @map("linked_item_id")
+  actionUrl      String?  @map("action_url")
+
+  // Target audience (empty arrays = show to everyone)
+  targetRoleIds  String[] @map("target_role_ids")
+  targetGroupIds String[] @map("target_group_ids")
+  targetUserIds  String[] @map("target_user_ids")
+
+  // Priority & pinning
+  isPinned    Boolean @default(false) @map("is_pinned")
+  priority    Int     @default(0)
+
+  // Dismiss behavior: 'none' | 'permanent' | 'until_update'
+  dismissType        String  @default("none") @map("dismiss_type")
+  // Show linked item's image instead of icon in cards
+  useLinkedItemImage Boolean @default(false) @map("use_linked_item_image")
+
+  createdBy   User          @relation(fields: [createdById], references: [id])
+  linkedItem  Item?         @relation(fields: [linkedItemId], references: [id], onDelete: SetNull)
+  dismissals  AnnouncementDismissal[]
+  reads       AnnouncementRead[]
+
+  @@index([isActive])
+  @@index([startDate, endDate])
+  @@index([isPinned, priority])
+  @@map("announcements")
+}
+
+model AnnouncementDismissal {
+  userId         String   @map("user_id")
+  announcementId String   @map("announcement_id")
+  dismissedAt    DateTime @default(now()) @map("dismissed_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, announcementId])
+  @@map("announcement_dismissals")
+}
+
+model AnnouncementRead {
+  userId         String   @map("user_id")
+  announcementId String   @map("announcement_id")
+  readAt         DateTime @default(now()) @map("read_at")
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, announcementId])
+  @@map("announcement_reads")
+}
+
+model AnnouncementTemplate {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  titlePrefix     String?  @map("title_prefix")
+  messageTemplate String?  @map("message_template")
+  icon            String?
+  color           String?
+  isBuiltIn       Boolean  @default(false) @map("is_built_in")
+  createdById     String?  @map("created_by_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  createdBy User? @relation(fields: [createdById], references: [id])
+
+  @@map("announcement_templates")
+}
+
+model ItemWatch {
+  userId    String   @map("user_id")
+  itemId    String   @map("item_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@id([userId, itemId])
+  @@index([itemId])
+  @@map("item_watches")
+}
+
+model ItemVersion {
+  id        String   @id @default(uuid())
+  itemId    String   @map("item_id")
+  version   Int
+  snapshot  String   @db.Text
+  userId    String   @map("user_id")
+  action    String   // CREATED, UPDATED, RESTORED
+  summary   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([itemId, version])
+  @@index([itemId, createdAt])
+  @@map("item_versions")
+}
+
+// Group 2: Saved Filters
+model SavedFilter {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  name      String
+  filters   String   @db.Text // JSON: {search, categoryId, locationId, tags, templateId, lowStock, componentFilter, sortBy, sortOrder}
+  isDefault Boolean  @default(false) @map("is_default")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("saved_filters")
+}
+
+// Group 3: Per-user Dashboard Config
+model DashboardConfig {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  layout    String   @db.Text // JSON: widget positions, sizes, order
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("dashboard_configs")
+}
+
+// Group 4: Location Capacity
+// (capacity fields added to Location model)
+
+// Group 6: Import History
+model ImportHistory {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  filename    String
+  totalRows   Int      @map("total_rows")
+  successRows Int      @map("success_rows")
+  failedRows  Int      @map("failed_rows")
+  errors      String?  @db.Text // JSON array of error details
+  itemIds     String[] @map("item_ids") // IDs of created items for undo
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("import_history")
+}
+
+// Group 9: Webhooks
+model Webhook {
+  id        String   @id @default(uuid())
+  name      String
+  url       String
+  secret    String?  // HMAC signing secret
+  events    String[] // item.created, item.updated, item.deleted, etc.
+  isActive  Boolean  @default(true) @map("is_active")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
+  @@map("webhooks")
+}
+
+// Group 10: Session Management
+model UserSession {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  token       String   @unique // hash of the JWT
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  lastActiveAt DateTime @default(now()) @map("last_active_at")
+  expiresAt   DateTime @map("expires_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("user_sessions")
+}

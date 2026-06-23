@@ -1,0 +1,219 @@
+// All available permissions in the system
+export const PERMISSIONS = {
+  // Items
+  ITEMS_CREATE: 'items:create',
+  ITEMS_READ: 'items:read',
+  ITEMS_UPDATE: 'items:update',
+  ITEMS_DELETE: 'items:delete',
+  ITEMS_BARCODE: 'items:barcode', // Manage SKU barcodes (generate, edit)
+
+  // Categories
+  CATEGORIES_CREATE: 'categories:create',
+  CATEGORIES_READ: 'categories:read',
+  CATEGORIES_UPDATE: 'categories:update',
+  CATEGORIES_DELETE: 'categories:delete',
+
+  // Locations
+  LOCATIONS_CREATE: 'locations:create',
+  LOCATIONS_READ: 'locations:read',
+  LOCATIONS_UPDATE: 'locations:update',
+  LOCATIONS_DELETE: 'locations:delete',
+  LOCATIONS_BARCODE: 'locations:barcode', // Manage barcodes (edit manually)
+
+  // Tags
+  TAGS_CREATE: 'tags:create',
+  TAGS_READ: 'tags:read',
+  TAGS_UPDATE: 'tags:update',
+  TAGS_DELETE: 'tags:delete',
+
+  // Users
+  USERS_CREATE: 'users:create',
+  USERS_READ: 'users:read',
+  USERS_UPDATE: 'users:update',
+  USERS_DELETE: 'users:delete',
+
+  // Roles
+  ROLES_CREATE: 'roles:create',
+  ROLES_READ: 'roles:read',
+  ROLES_UPDATE: 'roles:update',
+  ROLES_DELETE: 'roles:delete',
+
+  // Groups
+  GROUPS_CREATE: 'groups:create',
+  GROUPS_READ: 'groups:read',
+  GROUPS_UPDATE: 'groups:update',
+  GROUPS_DELETE: 'groups:delete',
+
+  // Templates
+  TEMPLATES_CREATE: 'templates:create',
+  TEMPLATES_READ: 'templates:read',
+  TEMPLATES_UPDATE: 'templates:update',
+  TEMPLATES_DELETE: 'templates:delete',
+
+  // Audit
+  AUDIT_READ: 'audit:read',
+
+  // Settings
+  SETTINGS_READ: 'settings:read',
+  SETTINGS_UPDATE: 'settings:update',
+
+  // Icons
+  ICONS_READ: 'icons:read',
+  ICONS_CREATE: 'icons:create',
+  ICONS_UPDATE: 'icons:update',
+  ICONS_DELETE: 'icons:delete',
+
+  // Quarantine
+  QUARANTINE_MANAGE: 'quarantine:manage',
+
+  // Barcodes Page
+  BARCODES_READ: 'barcodes:read',
+  BARCODES_EXPORT: 'barcodes:export',
+
+  // Devices
+  DEVICES_READ: 'devices:read',
+  DEVICES_UPDATE: 'devices:update',
+  DEVICES_DELETE: 'devices:delete',
+  DEVICES_MANAGE: 'devices:manage', // Admin: manage all users' devices
+
+  // Announcements
+  ANNOUNCEMENTS_CREATE: 'announcements:create',
+  ANNOUNCEMENTS_READ: 'announcements:read',
+  ANNOUNCEMENTS_UPDATE: 'announcements:update',
+  ANNOUNCEMENTS_DELETE: 'announcements:delete',
+} as const;
+
+export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
+
+// All permissions as an array
+export const ALL_PERMISSIONS = Object.values(PERMISSIONS);
+
+// Permission groups for easier role assignment
+export const PERMISSION_GROUPS = {
+  ITEMS_FULL: [
+    PERMISSIONS.ITEMS_CREATE,
+    PERMISSIONS.ITEMS_READ,
+    PERMISSIONS.ITEMS_UPDATE,
+    PERMISSIONS.ITEMS_DELETE,
+    PERMISSIONS.ITEMS_BARCODE,
+  ],
+  ITEMS_READ_ONLY: [PERMISSIONS.ITEMS_READ],
+  ITEMS_MANAGE: [
+    PERMISSIONS.ITEMS_CREATE,
+    PERMISSIONS.ITEMS_READ,
+    PERMISSIONS.ITEMS_UPDATE,
+    PERMISSIONS.ITEMS_BARCODE,
+  ],
+
+  CATEGORIES_FULL: [
+    PERMISSIONS.CATEGORIES_CREATE,
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.CATEGORIES_UPDATE,
+    PERMISSIONS.CATEGORIES_DELETE,
+  ],
+
+  LOCATIONS_FULL: [
+    PERMISSIONS.LOCATIONS_CREATE,
+    PERMISSIONS.LOCATIONS_READ,
+    PERMISSIONS.LOCATIONS_UPDATE,
+    PERMISSIONS.LOCATIONS_DELETE,
+    PERMISSIONS.LOCATIONS_BARCODE,
+  ],
+
+  TAGS_FULL: [
+    PERMISSIONS.TAGS_CREATE,
+    PERMISSIONS.TAGS_READ,
+    PERMISSIONS.TAGS_UPDATE,
+    PERMISSIONS.TAGS_DELETE,
+  ],
+
+  USERS_FULL: [
+    PERMISSIONS.USERS_CREATE,
+    PERMISSIONS.USERS_READ,
+    PERMISSIONS.USERS_UPDATE,
+    PERMISSIONS.USERS_DELETE,
+  ],
+
+  ROLES_FULL: [
+    PERMISSIONS.ROLES_CREATE,
+    PERMISSIONS.ROLES_READ,
+    PERMISSIONS.ROLES_UPDATE,
+    PERMISSIONS.ROLES_DELETE,
+  ],
+
+  GROUPS_FULL: [
+    PERMISSIONS.GROUPS_CREATE,
+    PERMISSIONS.GROUPS_READ,
+    PERMISSIONS.GROUPS_UPDATE,
+    PERMISSIONS.GROUPS_DELETE,
+  ],
+
+  TEMPLATES_FULL: [
+    PERMISSIONS.TEMPLATES_CREATE,
+    PERMISSIONS.TEMPLATES_READ,
+    PERMISSIONS.TEMPLATES_UPDATE,
+    PERMISSIONS.TEMPLATES_DELETE,
+  ],
+
+  ICONS_FULL: [
+    PERMISSIONS.ICONS_READ,
+    PERMISSIONS.ICONS_CREATE,
+    PERMISSIONS.ICONS_UPDATE,
+    PERMISSIONS.ICONS_DELETE,
+  ],
+
+  BARCODES_FULL: [
+    PERMISSIONS.BARCODES_READ,
+    PERMISSIONS.BARCODES_EXPORT,
+  ],
+
+  DEVICES_FULL: [
+    PERMISSIONS.DEVICES_READ,
+    PERMISSIONS.DEVICES_UPDATE,
+    PERMISSIONS.DEVICES_DELETE,
+    PERMISSIONS.DEVICES_MANAGE,
+  ],
+
+  ANNOUNCEMENTS_FULL: [
+    PERMISSIONS.ANNOUNCEMENTS_CREATE,
+    PERMISSIONS.ANNOUNCEMENTS_READ,
+    PERMISSIONS.ANNOUNCEMENTS_UPDATE,
+    PERMISSIONS.ANNOUNCEMENTS_DELETE,
+  ],
+};
+
+// Default role permissions
+export const DEFAULT_ROLE_PERMISSIONS = {
+  ADMIN: ALL_PERMISSIONS,
+  MANAGER: [
+    ...PERMISSION_GROUPS.ITEMS_FULL,
+    ...PERMISSION_GROUPS.CATEGORIES_FULL,
+    ...PERMISSION_GROUPS.LOCATIONS_FULL,
+    ...PERMISSION_GROUPS.TAGS_FULL,
+    ...PERMISSION_GROUPS.BARCODES_FULL,
+    PERMISSIONS.USERS_READ,
+    PERMISSIONS.GROUPS_READ,
+    PERMISSIONS.TEMPLATES_READ,
+    PERMISSIONS.AUDIT_READ,
+  ],
+  TECHNICIAN: [
+    PERMISSIONS.SETTINGS_READ,
+    PERMISSIONS.SETTINGS_UPDATE,
+    PERMISSIONS.AUDIT_READ,
+  ],
+  USER: [
+    ...PERMISSION_GROUPS.ITEMS_MANAGE,
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.LOCATIONS_READ,
+    PERMISSIONS.TAGS_READ,
+    PERMISSIONS.TEMPLATES_READ,
+    PERMISSIONS.BARCODES_READ,
+    PERMISSIONS.BARCODES_EXPORT,
+  ],
+  VIEWER: [
+    PERMISSIONS.ITEMS_READ,
+    PERMISSIONS.CATEGORIES_READ,
+    PERMISSIONS.LOCATIONS_READ,
+    PERMISSIONS.TAGS_READ,
+  ],
+};
