@@ -16,7 +16,7 @@ This is an npm workspaces monorepo — `backend` and `frontend` are separate wor
 Download the latest release into `/opt` (not a clone of `main`, which may contain in-progress work):
 
 ```bash
-sudo mkdir -p /opt && cd /opt
+cd /opt
 sudo curl -LO https://github.com/warehouse-inventorymanagement/warehouse/releases/download/v1.1.0/warehouse-v1.1.0.tar.gz
 sudo tar xzf warehouse-v1.1.0.tar.gz
 sudo rm warehouse-v1.1.0.tar.gz
