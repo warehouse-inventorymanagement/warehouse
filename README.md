@@ -11,6 +11,18 @@ This is an npm workspaces monorepo — `backend` and `frontend` are separate wor
 
 ## Setup
 
+### 0. Get the code
+
+Download the latest release (not a clone of `main`, which may contain in-progress work):
+
+```bash
+curl -LO https://github.com/warehouse-inventorymanagement/warehouse/releases/download/v1.1.0/warehouse-v1.1.0.tar.gz
+tar xzf warehouse-v1.1.0.tar.gz
+cd warehouse
+```
+
+Or grab the same archive from the [Releases page](https://github.com/warehouse-inventorymanagement/warehouse/releases/latest).
+
 ### 1. Database
 
 Requires PostgreSQL. Create a dedicated user and database (run as the `postgres` superuser):
